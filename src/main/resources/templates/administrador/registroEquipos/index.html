@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro Equipos</title>
+
+  <!-- CSS personalizados -->
+  <link rel="stylesheet" th:href="@{/css/admin.css}">
+
+  <!-- Tailwind y Alpine -->
+  <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js" defer></script>
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+</head>
+<body x-data="{ openMenu: false }">
+
+<header class="header">
+  <div class="flex justify-between items-center px-4 py-2">
+    <button @click="openMenu = !openMenu" class="focus:outline-none">
+      <i class="bi bi-list text-2xl text-green-800"></i>
+    </button>
+    <div class="flex items-center relative" x-data="{ open: false }">
+      <button @click="open = !open" class="flex items-center focus:outline-none">
+        <img th:src="@{/img/instructor.gif}" class="h-10 w-10 rounded-full" alt="Perfil">
+        <span class="ml-2 font-semibold"> </span>
+        <i class="bi bi-caret-down-fill ml-2"></i>
+      </button>
+      <div x-show="open" @click.away="open = false" class="menu-user">
+        <ul>
+          <li><a th:href="@{/perfil}">Mi Perfil</a></li>
+          <li><a th:href="@{/logout}">Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="flex">
+  <aside :class="openMenu ? 'sidebar sidebar-open' : 'sidebar sidebar-closed'">
+    <img th:src="@{/img/logocheckin.png}" alt="Logo" class="logo">
+    <nav>
+      <a th:href="@{/administrador/aprendices}" class="nav-link"><i class="bi bi-people-fill"></i> Aprendices</a>
+      <a th:href="@{/administrador/instructors}" class="nav-link"><i class="bi bi-person-badge-fill"></i> Instructores</a>
+      <a th:href="@{/administrador/carnet_digital}" class="nav-link"><i class="bi bi-card-image"></i> Carnet Digital</a>
+      <a th:href="@{/administrador/registroEquipos}" class="nav-link"><i class="bi bi-hdd-stack"></i> Registro Equipos</a>
+      <a th:href="@{/administrador/justificaciones}" class="nav-link"><i class="bi bi-chat-dots"></i> Justificaciones</a>
+      <a th:href="@{/administrador/reportes}" class="nav-link"><i class="bi bi-bar-chart-line"></i> Reportes</a>
+      <a th:href="@{/administrador/programming}" class="nav-link"><i class="bi bi-grid"></i> Programacion</a>
+      <a th:href="@{/administrador/asistencia}" class="nav-link"><i class="bi bi-check2-square"></i> Asistencia</a>
+    </nav>
+    <div class="scroll-indicator">
+      <i class="bi bi-arrow-down-short"></i>
+    </div>
+  </aside>
+
+  <main class="flex-1 p-6 transition-all duration-300" :class="openMenu ? 'ml-0 md:ml-64' : 'ml-0'">
+    <div th:if="${mensajeExito}" class="mensaje-exito" role="alert" th:text="${mensajeExito}"></div>
+    <div class="container">
+      <h1 class="title">Equipos</h1>
+
+      <div class="text-center mb-4">
+        <a th:href="@{/administrador/registroEquipos/create}" class="btn-agregar">Agregar Equipo</a>
+      </div>
+
+      <!-- Filtros -->
+      <form th:action="@{/administrador/registroEquipos}" method="GET" class="form-filtros">
+
+        <div>
+          <label for="serialEquipo" class="label-filtro">Filtrar por Serial</label>
+          <input id="serialEquipo" name="serialEquipo" type="text"
+                 th:value="${param.serialEquipo}" placeholder="Serial..."
+                 class="input-text">
+        </div>
+
+        <div>
+          <label for="usuario" class="label-filtro">Filtrar por Usuario</label>
+          <input id="usuario" name="usuario" type="text"
+                 th:value="${param.user}" placeholder="Nombre usuario..."
+                 class="input-text">
+        </div>
+
+        <div class="botones-filtros">
+          <button type="submit" class="btn-filtrar">Buscar</button>
+          <a th:href="@{/administrador/registroEquipos}" class="btn-limpiar">Limpiar</a>
+        </div>
+      </form>
+
+      <!-- Tabla -->
+      <div class="overflow-x-auto">
+        <table class="tabla-equipos">
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>Tipo</th>
+            <th>Marca</th>
+            <th>Serial</th>
+            <th>Descripción</th>
+            <th>Registrado por</th>
+            <th>Acciones</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="equipo : ${equipos}" class="fila-equipo">
+            <td th:text="${equipo.user != null ? equipo.user.id : 'N/A'}">1</td>
+            <td th:text="${equipo.tipo}">Portátil</td>
+            <td th:text="${equipo.marca}">Dell</td>
+            <td th:text="${equipo.serialEquipo}">ABC123</td>
+            <td th:text="${equipo.descripcion}">Descripción</td>
+
+            <!-- NUEVO: mostrar nombre del usuario -->
+            <td th:text="${equipo.user != null ? equipo.user.nombre : 'Sin usuario'}">Nombre Usuario</td>
+
+            <td class="acciones">
+              <a th:href="@{/administrador/registroEquipos/show/{id}(id=${equipo.id})}" class="accion-ver">Ver</a>
+              <a th:href="@{/administrador/registroEquipos/edit/{id}(id=${equipo.id})}" class="accion-editar">Editar</a>
+              <form th:action="@{/administrador/registroEquipos/eliminar/{id}(id=${equipo.id})}" method="post" onsubmit="return confirm('¿Estás seguro de eliminar esta programación?')">
+                <input type="hidden" name="_method" value="delete"/>
+                <button type="submit" class="accion-eliminar">Eliminar</button>
+              </form>
+            </td>
+          </tr>
+          </tbody>
+
+        </table>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+</body>
+</html>

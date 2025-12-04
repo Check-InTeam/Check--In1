@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Instructor- Registro Equipos</title>
+
+    <!-- CSS personalizados -->
+    <link rel="stylesheet" th:href="@{/css/instructor.css}">
+
+    <!-- Tailwind y Alpine -->
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js" defer></script>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+</head>
+<body x-data="{ openMenu: false }">
+
+<header class="header">
+    <div class="flex justify-between items-center px-4 py-2">
+        <button @click="openMenu = !openMenu" class="focus:outline-none">
+            <i class="bi bi-list text-2xl text-green-800"></i>
+        </button>
+        <div class="flex items-center relative" x-data="{ open: false }">
+            <button @click="open = !open" class="flex items-center focus:outline-none">
+                <img th:src="@{/img/instructor.gif}" class="h-10 w-10 rounded-full" alt="Perfil">
+                <span class="ml-2 font-semibold"> </span>
+                <i class="bi bi-caret-down-fill ml-2"></i>
+            </button>
+            <div x-show="open" @click.away="open = false" class="menu-user">
+                <ul>
+                    <li><a th:href="@{/perfil}">Mi Perfil</a></li>
+                    <li><a th:href="@{/logout}">Cerrar Sesión</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="flex">
+    <aside :class="openMenu ? 'sidebar sidebar-open' : 'sidebar sidebar-closed'">
+        <br>
+        <img th:src="@{/img/logocheckin.png}" alt="Logo" class="logo">
+        <nav>
+            <a th:href="@{/instructor/asistencia}" class="nav-link"><i class="bi bi-check2-square"></i> Asistencias</a>
+            <a th:href="@{/instructor/carnet_digital}" class="nav-link"><i class="bi bi-card-image"></i> Carnet Digital</a>
+            <a th:href="@{/instructor/registroEquipos}" class="nav-link"><i class="bi bi-hdd-stack"></i> Registro Equipos</a>
+            <a th:href="@{/instructor/justificaciones}" class="nav-link"><i class="bi bi-chat-dots"></i> Justificaciones</a>
+            <a th:href="@{/instructor/reportes}" class="nav-link"><i class="bi bi-bar-chart-line"></i> Reportes</a>
+            <a th:href="@{/instructor/programming}" class="nav-link"><i class="bi bi-grid"></i> Programación</a>
+        </nav>
+        <div class="scroll-indicator">
+            <i class="bi bi-arrow-down-short"></i>
+        </div>
+    </aside>
+
+    <main class="registro-equipos-main">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6 card-container">
+
+            <!-- Tarjeta para agregar nuevo equipo -->
+            <div class="card-equipo flex items-center justify-center cursor-pointer hover:shadow-lg border border-dashed border-gray-400 rounded-lg text-center text-green-700 font-bold text-xl select-none"
+                 th:onclick="|window.location.href='@{/instructor/registroEquipos/create}'|">
+                <i class="bi bi-plus-circle mb-2 text-4xl"></i>
+                <p>Agregar Equipo</p>
+            </div>
+
+
+
+            <!-- Tarjetas existentes -->
+            <div th:each="equipo : ${equipos}" class="card-equipo">
+                <h2 class="card-title" th:text="'Equipo: ' + ${equipo.tipo}">Equipo: Portátil</h2>
+                <p><strong>Marca:</strong> <span th:text="${equipo.marca}">Dell</span></p>
+                <p><strong>Serial:</strong> <span th:text="${equipo.serialEquipo}">ABC123</span></p>
+                <p><strong>Descripción:</strong> <span th:text="${equipo.descripcion}">Equipo de laboratorio</span></p>
+            </div>
+        </div>
+    </main>
+
+
+</div>
+</body>
+</html>

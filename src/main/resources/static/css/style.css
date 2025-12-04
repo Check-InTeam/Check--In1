@@ -1,0 +1,23 @@
+@import url('https://fonts.cdnfonts.com/css/josephsophia');
+@import url('https://fonts.googleapis.com/css2?family=Caviar+Dreams&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Brittany+Signature&display=swap');
+
+
+* {
+    font-family: 'Caviar Dreams', sans-serif;
+}
+
+
+body {
+    background: linear-gradient(to right, rgb(155, 254, 137), rgb(162, 237, 197));
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.titulo-checkin {
+    font-family: 'Brittany Signature';
+    font-size: 40px;
+}

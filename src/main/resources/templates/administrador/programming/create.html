@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Programación</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <link rel="stylesheet" th:href="@{/css/programacion.css}">
+
+    <!-- Tailwind y Alpine -->
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js" defer></script>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+</head>
+<body x-data="{ openMenu: false }">
+
+<header class="header">
+    <div class="flex justify-between items-center px-4 py-2">
+        <button @click="openMenu = !openMenu" class="focus:outline-none">
+            <i class="bi bi-list text-2xl text-green-800"></i>
+        </button>
+        <div class="flex items-center relative" x-data="{ open: false }">
+            <button @click="open = !open" class="flex items-center focus:outline-none">
+                <img th:src="@{/img/instructor.gif}" class="h-10 w-10 rounded-full" alt="Perfil">
+                <i class="bi bi-caret-down-fill ml-2"></i>
+            </button>
+            <div x-show="open" @click.away="open = false" class="menu-user">
+                <ul>
+                    <li><a th:href="@{/perfil}">Mi Perfil</a></li>
+                    <li><a th:href="@{/logout}">Cerrar Sesión</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="flex">
+    <!-- Sidebar -->
+    <aside :class="openMenu ? 'sidebar sidebar-open' : 'sidebar sidebar-closed'">
+        <img th:src="@{/img/logocheckin.png}" alt="Logo" class="logo">
+        <nav>
+            <a th:href="@{/administrador/aprendices}" class="nav-link"><i class="bi bi-people-fill"></i> Aprendices</a>
+            <a th:href="@{/administrador/instructors}" class="nav-link"><i class="bi bi-person-badge-fill"></i> Instructores</a>
+            <a th:href="@{/administrador/carnet_digital}" class="nav-link"><i class="bi bi-card-image"></i> Carnet Digital</a>
+            <a th:href="@{/administrador/registroEquipos}" class="nav-link"><i class="bi bi-hdd-stack"></i> Registro Equipos</a>
+            <a th:href="@{/administrador/justificaciones}" class="nav-link"><i class="bi bi-chat-dots"></i> Justificaciones</a>
+            <a th:href="@{/administrador/reportes}" class="nav-link"><i class="bi bi-bar-chart-line"></i> Reportes</a>
+            <a th:href="@{/administrador/programming}" class="nav-link"><i class="bi bi-grid"></i> Programacion</a>
+            <a th:href="@{/administrador/asistencia}" class="nav-link"><i class="bi bi-check2-square"></i> Asistencia</a>
+        </nav>
+        <div class="scroll-indicator">
+            <i class="bi bi-arrow-down-short"></i>
+        </div>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="flex-1 p-6 transition-all duration-300" :class="openMenu ? 'ml-0 md:ml-64' : 'ml-0'">
+        <div class="formulario-programacion">
+            <h2 class="formulario-titulo">Crear Programación</h2>
+
+            <form th:action="@{/administrador/programming}" method="post" th:object="${programming}">
+                <div class="campo-formulario">
+                    <label for="nombre_asignatura">Asignatura</label>
+                    <input type="text" id="nombre_asignatura" th:field="*{nombreAsignatura}" required />
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" th:field="*{descripcion}"></textarea>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="ficha">Ficha</label>
+                    <input type="text" id="ficha" th:field="*{ficha}" required />
+                </div>
+
+                <div class="grid-campos">
+                    <div>
+                        <label for="fecha_inicio">Fecha Inicio</label>
+                        <input type="date" id="fecha_inicio" th:field="*{fechaInicio}" required />
+                    </div>
+                    <div>
+                        <label for="fecha_fin">Fecha Fin</label>
+                        <input type="date" id="fecha_fin" th:field="*{fechaFin}" required />
+                    </div>
+                </div>
+
+                <div class="grid-campos">
+                    <div>
+                        <label for="hora_inicio">Hora Inicio</label>
+                        <input type="time" id="hora_inicio" th:field="*{horaInicio}" required />
+                    </div>
+                    <div>
+                        <label for="hora_fin">Hora Fin</label>
+                        <input type="time" id="hora_fin" th:field="*{horaFin}" required />
+                    </div>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="ambiente">Ambiente</label>
+                    <input type="text" id="ambiente" th:field="*{ambiente}" />
+                </div>
+
+                <!-- Campo para seleccionar instructor (user.id) -->
+                <div class="campo-formulario">
+                    <label for="user">Instructor</label>
+                    <select id="user" name="user.id" class="form-select" required>
+                        <option value="" disabled selected> Seleccione un instructor </option>
+                        <option th:each="user : ${users}"
+                                th:value="${user.id}"
+                                th:text="${user.nombre}">
+
+                        </option>
+                    </select>
+                </div>
+
+                <button type="submit" class="boton-enviar">Guardar</button>
+            </form>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

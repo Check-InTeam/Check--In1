@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Reportes</title>
+  <link rel="stylesheet" th:href="@{/css/admin.css}">
+  <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+</head>
+<body x-data="{ openMenu: false }">
+
+<header class="header">
+  <div class="flex justify-between items-center px-4 py-2">
+    <button @click="openMenu = !openMenu" class="focus:outline-none">
+      <i class="bi bi-list text-2xl text-green-800"></i>
+    </button>
+    <div class="flex items-center relative" x-data="{ open: false }">
+      <button @click="open = !open" class="flex items-center focus:outline-none">
+        <img th:src="@{/img/instructor.gif}" class="h-10 w-10 rounded-full" alt="Perfil">
+        <i class="bi bi-caret-down-fill ml-2"></i>
+      </button>
+      <div x-show="open" @click.away="open = false" class="menu-user">
+        <ul>
+          <li><a th:href="@{/perfil}">Mi Perfil</a></li>
+          <li><a th:href="@{/logout}">Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="flex">
+  <!-- Sidebar -->
+  <aside :class="openMenu ? 'sidebar-open' : 'sidebar-closed'" class="sidebar">
+    <img th:src="@{/img/logocheckin.png}" alt="Logo" class="logo">
+    <nav>
+      <a th:href="@{/administrador/aprendices}" class="nav-link"><i class="bi bi-people-fill"></i> Aprendices</a>
+      <a th:href="@{/administrador/instructors}" class="nav-link"><i class="bi bi-person-badge-fill"></i> Instructores</a>
+      <a th:href="@{/administrador/carnet_digital}" class="nav-link"><i class="bi bi-card-image"></i> Carnet Digital</a>
+      <a th:href="@{/administrador/registroEquipos}" class="nav-link"><i class="bi bi-hdd-stack"></i> Registro Equipos</a>
+      <a th:href="@{/administrador/justificaciones}" class="nav-link"><i class="bi bi-chat-dots"></i> Justificaciones</a>
+      <a th:href="@{/administrador/reportes}" class="nav-link"><i class="bi bi-bar-chart-line"></i> Reportes</a>
+      <a th:href="@{/administrador/programming}" class="nav-link"><i class="bi bi-grid"></i> Programación</a>
+      <a th:href="@{/administrador/asistencia}" class="nav-link"><i class="bi bi-check2-square"></i> Asistencia</a>
+    </nav>
+    <div class="scroll-indicator">
+      <i class="bi bi-arrow-down-short"></i>
+    </div>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="main-content" :class="openMenu ? 'main-expanded' : 'main-collapsed'">
+
+    <div class="dashboard-container">
+
+      <!-- Cabecera -->
+      <div class="dashboard-header">
+        <h2 class="dashboard-title">
+          Gestión de Reportes
+        </h2>
+        <a th:href="@{/administrador/reportes/create}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Crear Reporte</a>
+      </div>
+
+      <!-- Tabla de reportes -->
+      <table class="justificaciones-table">
+        <thead>
+        <tr class="table-header">
+          <th>ID</th>
+          <th>Título</th>
+          <th>Descripción</th>
+          <th>Tipo</th>
+          <th>Aprendiz</th>
+          <th>Fallas</th>
+          <th>Advertencia</th>
+          <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="reporte : ${reportes}" class="table-row">
+          <td th:text="${reporte.id}"></td>
+          <td th:text="${reporte.titulo}"></td>
+          <td th:text="${reporte.descripcion}"></td>
+          <td th:text="${reporte.tipo.name}"></td>
+          <td th:text="${reporte.user.nombre}"></td>
+          <td th:text="${reporte.numeroFallas}"></td>
+          <td th:text="${reporte.advertencia ? 'Sí' : 'No'}"></td>
+          <td class="text-center space-x-2">
+
+            <form th:action="@{'/administrador/reportes/delete/{id}' + ${reporte.id}}" method="post" style="display:inline;">
+              <button type="submit" onclick="return confirm('¿Seguro deseas eliminar este reporte?');" class="btn-delete">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

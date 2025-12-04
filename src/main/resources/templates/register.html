@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Registrarse</title>
+
+
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet" />
+    <link th:href="@{/css/register.css}" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js" defer></script>
+</head>
+
+<body>
+<section class="bg-transparent w-full flex items-center justify-center">
+    <div class="flex flex-col items-center justify-center px-6 mx-auto w-full max-w-xl">
+        <div class="flex items-center mb-6 text-4xl text-green-900 title" >
+            Registrarse
+        </div>
+
+        <div class="form-container">
+            <div class="p-4 space-y-4">
+                <h1 class="form-title">Crear Cuenta</h1>
+
+                <!-- 🔴 Mensaje de error si el correo ya existe -->
+                <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-center mb-4">
+                <strong th:text="${error}"></strong>
+                    </div>
+
+                <form th:action="@{/register}" method="post" th:object="${user}" class="space-y-4">
+                    <div>
+                        <label for="nombre" class="form-label">Nombre Completo</label>
+                        <input type="text" th:field="*{nombre}" id="nombre" class="form-input" required />
+                    </div>
+
+                    <div>
+                        <label for="email" class="form-label">Correo Electrónico</label>
+                        <input type="email" th:field="*{email}" id="email" class="form-input" required />
+                    </div>
+
+                    <div>
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input type="password" th:field="*{password}" id="password" class="form-input" required />
+                    </div>
+
+                    <div>
+                        <label for="confirmar" class="form-label">Confirmar contraseña</label>
+                        <input type="password" id="confirmar" class="form-input" required />
+                    </div>
+
+                    <div class="flex items-start">
+                        <input id="terms" type="checkbox" class="checkbox" required />
+                        <label for="terms" class="ml-2 text-sm text-green-800">
+                            Acepto los <a class="font-medium text-green-600 hover:underline" href="#">Términos y Condiciones</a>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="submit-button">
+                        Crear una cuenta
+                    </button>
+
+                    <p class="text-sm text-green-800 text-center">
+                        ¿Ya tienes una cuenta?
+                        <a th:href="@{/login}" class="font-medium text-green-600 hover:underline">Inicia sesión aquí</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

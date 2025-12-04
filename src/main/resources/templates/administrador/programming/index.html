@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Admin</title>
+  <link rel="stylesheet" th:href="@{/css/admin.css}">
+  <link rel="stylesheet" th:href="@{/css/programacion.css}">
+
+  <!-- Tailwind y Alpine -->
+  <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js" defer></script>
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+</head>
+<body x-data="{ openMenu: false, openModal: false }">
+
+<header class="header">
+  <div class="flex justify-between items-center px-4 py-2">
+    <button @click="openMenu = !openMenu" class="focus:outline-none">
+      <i class="bi bi-list text-2xl text-green-800"></i>
+    </button>
+    <div class="flex items-center relative" x-data="{ open: false }">
+      <button @click="open = !open" class="flex items-center focus:outline-none">
+        <img th:src="@{/img/instructor.gif}" class="h-10 w-10 rounded-full" alt="Perfil">
+        <i class="bi bi-caret-down-fill ml-2"></i>
+      </button>
+      <div x-show="open" @click.away="open = false" class="menu-user">
+        <ul>
+          <li><a th:href="@{/perfil}">Mi Perfil</a></li>
+          <li><a th:href="@{/logout}">Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="flex">
+  <!-- Sidebar -->
+  <aside :class="openMenu ? 'sidebar sidebar-open' : 'sidebar sidebar-closed'">
+    <img th:src="@{/img/logocheckin.png}" alt="Logo" class="logo">
+    <nav>
+      <a th:href="@{/administrador/aprendices}" class="nav-link"><i class="bi bi-people-fill"></i> Aprendices</a>
+      <a th:href="@{/administrador/instructors}" class="nav-link"><i class="bi bi-person-badge-fill"></i> Instructores</a>
+      <a th:href="@{/administrador/carnet_digital}" class="nav-link"><i class="bi bi-card-image"></i> Carnet Digital</a>
+      <a th:href="@{/administrador/registroEquipos}" class="nav-link"><i class="bi bi-hdd-stack"></i> Registro Equipos</a>
+      <a th:href="@{/administrador/justificaciones}" class="nav-link"><i class="bi bi-chat-dots"></i> Justificaciones</a>
+      <a th:href="@{/administrador/reportes}" class="nav-link"><i class="bi bi-bar-chart-line"></i> Reportes</a>
+      <a th:href="@{/administrador/programming}" class="nav-link"><i class="bi bi-grid"></i> Programacion</a>
+      <a th:href="@{/administrador/asistencia}" class="nav-link"><i class="bi bi-check2-square"></i> Asistencia</a>
+    </nav>
+    <div class="scroll-indicator">
+      <i class="bi bi-arrow-down-short"></i>
+    </div>
+  </aside>
+
+  <main class="flex-1 p-6 transition-all duration-300" :class="openMenu ? 'ml-0 md:ml-64' : 'ml-0'">
+  <div class="programacion-container">
+    <div th:if="${messageExit != null}" class="message-exito" role="alert"
+         th:text="${messageExit}"></div>
+
+    <div th:if="${messageError != null}" class="message-error" role="alert"
+         th:text="${messageError}"></div>
+
+
+    <h2 class="titulo-programacion">Programación 2025</h2>
+
+    <div class="flex space-x-4 items-center mb-4">
+      <!-- Botón crear -->
+      <a th:href="@{/administrador/programming/create}" class="btn-crear-programacion">
+        Crear Nueva Programación
+      </a>
+
+      <!-- Botón abrir modal -->
+      <button @click="openModal = true" type="button" class="btn-filtrar">
+        Subir Programación
+      </button>
+    </div>
+
+    <!-- Filtros -->
+    <form th:action="@{/administrador/programming}" method="get" class="formulario-filtros">
+      <input type="text" name="nombreAsignatura" placeholder="Buscar asignatura"
+             th:value="${param.nombreAsignatura}" class="campo-filtro"/>
+
+      <input type="text" name="ficha" placeholder="Buscar ficha"
+             th:value="${param.ficha}" class="campo-filtro"/>
+
+      <button type="submit" class="btn-filtrar">Filtrar</button>
+      <a th:href="@{/administrador/programming}" class="btn-limpiar">Limpiar</a>
+    </form>
+
+    <!-- Tabla -->
+    <table class="tabla-programacion">
+      <thead>
+      <tr>
+        <th>Nombre de Asignatura</th>
+        <th>Descripción</th>
+        <th>Ficha</th>
+        <th>Fecha de Inicio</th>
+        <th>Fecha Fin</th>
+        <th>Hora de Inicio</th>
+        <th>Hora Final</th>
+        <th>Ambiente</th>
+        <th>Instructor</th>
+        <th>Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="programacion : ${programming}">
+        <td th:text="${programacion.nombreAsignatura}"></td>
+        <td th:text="${programacion.descripcion}"></td>
+        <td th:text="${programacion.ficha}"></td>
+        <td th:text="${programacion.fechaInicio}"></td>
+        <td th:text="${programacion.fechaFin}"></td>
+        <td th:text="${programacion.horaInicio}"></td>
+        <td th:text="${programacion.horaFin}"></td>
+        <td th:text="${programacion.ambiente}"></td>
+        <td th:text="${programacion.user.nombre}"></td>
+        <td class="acciones">
+          <div class="botones-acciones">
+            <a th:href="@{/administrador/programming/show/{id}(id=${programacion.id})}" class="link-ver">Ver</a>
+            <a th:href="@{/administrador/programming/edit/{id}(id=${programacion.id})}" class="link-editar">Editar</a>
+            <form th:action="@{/administrador/programming/eliminar/{id}(id=${programacion.id})}" method="post"
+                  onsubmit="return confirm('¿Estás seguro de eliminar esta programación?')">
+              <input type="hidden" name="_method" value="delete"/>
+              <button type="submit" class="eliminar">Eliminar</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  </main>
+</div>
+
+<!-- ============================ -->
+<!-- Modal subir CSV -->
+<!-- ============================ -->
+<div x-show="openModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+  <div class="bg-white rounded-lg p-6 w-96 shadow-lg">
+    <h3 class="text-xl font-semibold mb-4">Subir Programación (CSV)</h3>
+
+    <form th:action="@{/administrador/programming/upload}" method="post" enctype="multipart/form-data"
+          class="space-y-4">
+      <input type="file" name="file" accept=".csv" required
+             class="w-full border p-2 rounded"/>
+
+      <div class="flex justify-end space-x-2">
+        <button type="button" @click="openModal = false"
+                class="bg-gray-400 text-white px-4 py-2 rounded">Cancelar</button>
+        <button type="submit"
+                class="bg-green-600 text-white px-4 py-2 rounded">Subir</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

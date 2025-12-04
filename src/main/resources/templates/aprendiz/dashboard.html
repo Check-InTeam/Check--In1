@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Aprendiz</title>
+  <link rel="stylesheet" th:href="@{/css/aprendiz.css}">
+
+  <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js" defer></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+</head>
+<body style="background-color:rgb(253,255,252)" x-data="{ openMenu: false }">
+
+<header class="header">
+  <div class="flex justify-between items-center px-4 py-2">
+    <button @click="openMenu = !openMenu" class="focus:outline-none">
+      <i class="bi bi-list text-2xl text-green-800"></i>
+    </button>
+    <div class="flex items-center relative" x-data="{ open: false }">
+      <button @click="open = !open" class="flex items-center focus:outline-none">
+        <img th:src="@{/img/instructor.gif}" class="h-10 w-10 rounded-full" alt="Perfil">
+        <span class="ml-2 font-semibold" th:text="${user.nombre}"></span>
+        <i class="bi bi-caret-down-fill ml-2"></i>
+      </button>
+      <div x-show="open" @click.away="open = false" class="menu-user">
+        <ul>
+          <li><a href="#" th:href="@{/perfil}">Mi Perfil</a></li>
+          <li><a href="#" th:href="@{/logout}">Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="flex">
+  <!-- Sidebar -->
+  <aside :class="openMenu ? 'sidebar-open' : 'sidebar-closed'" class="sidebar">
+  <br>
+    <img th:src="@{/img/logocheckin.png}" alt="Logo" class="logo">
+    <nav>
+      <a th:href="@{/aprendiz/carnet_digital}" class="nav-link"><i class="bi bi-card-image"></i> Carnet Digital</a>
+      <a th:href="@{/aprendiz/registroEquipos}" class="nav-link"><i class="bi bi-hdd-stack"></i> Registro Equipos</a>
+      <a th:href="@{/aprendiz/justificaciones}" class="nav-link"><i class="bi bi-chat-dots"></i> Justificaciones</a>
+      <a th:href="@{/aprendiz/reportes}" class="nav-link"><i class="bi bi-bar-chart-line"></i> Reportes</a>
+      <a th:href="@{/aprendiz/programming}" class="nav-link"><i class="bi bi-grid"></i> Programacion</a>
+    </nav>
+    <div class="scroll-indicator">
+      <i class="bi bi-arrow-down-short"></i>
+    </div>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="main-content">
+    <div class="mb-6">
+      <h1 class="header-title">Bienvenidos,<br> <span th:text="${user.nombre}"></span></h1>
+    </div>
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <!-- Carnet Digital -->
+      <div class="card card-carnet">
+        <img th:src="@{/img/carnet.gif}" alt="Carnet" class="card-img">
+        <h2 class="card-title">Mi Carnet Digital</h2>
+        <a th:href="@{/aprendiz/carnet_digital}" class="card-button">Ver Carnet</a>
+      </div>
+
+      <!-- Equipos -->
+      <div class="card card-equipos">
+        <img th:src="@{/img/equipos.gif}" alt="Equipos" class="card-img">
+        <h2 class="card-title">Mis Equipos Registrados</h2>
+        <ul class="card-list">
+          <li th:each="equipo : ${equipos}" th:text="${equipo.marca + ' - ' + equipo.serialEquipo}">Equipo ejemplo</li>
+          <li th:if="${#lists.isEmpty(equipos)}" class="empty-text">No tienes equipos registrados.</li>
+        </ul>
+      </div>
+
+      <!-- Justificaciones -->
+      <div class="card card-justificaciones">
+        <h2 class="card-title">Mis Justificaciones</h2>
+        <ul class="card-list">
+          <li th:each="justificacion : ${justificaciones}" th:text="${justificacion.motivo + ' (' + justificacion.estado + ')'}">Justificación ejemplo</li>
+          <li th:if="${#lists.isEmpty(justificaciones)}" class="empty-text">No has enviado justificaciones.</li>
+        </ul>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+
+
+</body>
+</html>

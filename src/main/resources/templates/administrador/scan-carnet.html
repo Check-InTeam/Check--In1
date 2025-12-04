@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Escanear Carnet (QR)</title>
+
+  <!-- Tailwind opcional -->
+  <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+
+  <style>
+    /* Estilos básicos */
+    .scanner-wrap { max-width: 900px; margin: 2rem auto; }
+    .video-wrap { position: relative; width: 100%; padding-top: 56.25%; background:#000; border-radius:0.5rem; overflow:hidden; }
+    video#video { position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; }
+    canvas#overlay { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+    .controls { display:flex; gap:0.5rem; margin-top:1rem; }
+    .btn { background:#c7f0d1; color:#064e3b; padding:.5rem .9rem; border-radius:.4rem; font-weight:600; cursor:pointer; text-decoration:none; }
+    .btn.danger { background:#fecaca; color:#7f1d1d; }
+    .info { margin-top:1rem; background:#f8fafc; padding:.8rem; border-radius:.4rem; border:1px solid #e2e8f0; }
+    .result { font-weight:700; color:#065f46; word-break:break-all; }
+    .small { font-size:.9rem; color:#475569; }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+<div class="scanner-wrap p-6">
+  <h1 class="text-2xl font-bold text-green-800 mb-4">Escanear Carnet (QR)</h1>
+
+  <!-- BOTÓN PARA VOLVER AL DASHBOARD -->
+  <a th:href="@{/administrador/dashboard}"
+     class="bg-green-300 hover:bg-green-400 text-green-900 px-4 py-2 rounded-md inline-block mb-4">
+    ← Volver al Dashboard
+  </a>
+
+  <div class="video-wrap" id="videoWrapper">
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="overlay"></canvas>
+    <!-- Mensaje sobre permisos -->
+    <div id="no-camera" class="absolute inset-0 flex items-center justify-center text-white text-center p-4" style="display:none;background:rgba(0,0,0,0.45);">
+      <div>
+        <p class="text-lg font-semibold">No se pudo acceder a la cámara</p>
+        <p class="small">Revisa permisos del navegador o usa HTTPS / localhost.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="startBtn" class="btn">Iniciar cámara</button>
+    <button id="stopBtn" class="btn danger" disabled>Detener cámara</button>
+    <button id="flashBtn" class="btn" style="display:none">Encender flash</button>
+  </div>
+
+  <div class="info mt-4">
+    <p class="small">Resultado:</p>
+    <p id="result" class="result">— Esperando escaneo —</p>
+    <p id="format" class="small"></p>
+  </div>
+
+
+</div>
+
+<!-- jsQR fallback (CDN) -->
+<script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
+
+<script>
+  // Elementos
+  const video = document.getElementById('video');
+  const overlay = document.getElementById('overlay');
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const flashBtn = document.getElementById('flashBtn');
+  const resultEl = document.getElementById('result');
+  const formatEl = document.getElementById('format');
+  const noCamEl = document.getElementById('no-camera');
+
+  let stream = null;
+  let scanning = false;
+  let barcodeDetector = null;
+  let rafId = null;
+  let overlayCtx = overlay.getContext('2d');
+  let track = null;
+  let useTorch = false;
+
+  // Ajustar canvas al video
+  function resizeCanvas() {
+    overlay.width = video.videoWidth;
+    overlay.height = video.videoHeight;
+  }
+
+  // Dibujar cuadro alrededor de QR
+  function drawBoundingBox(points, color = 'lime') {
+    overlayCtx.lineWidth = 4;
+    overlayCtx.strokeStyle = color;
+    overlayCtx.beginPath();
+    overlayCtx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) overlayCtx.lineTo(points[i].x, points[i].y);
+    overlayCtx.closePath();
+    overlayCtx.stroke();
+  }
+
+  // Lectura via BarcodeDetector (si disponible)
+  async function scanWithBarcodeDetector() {
+    try {
+      const detections = await barcodeDetector.detect(video);
+      overlayCtx.clearRect(0,0,overlay.width,overlay.height);
+      if (detections.length) {
+        const d = detections[0];
+        // dibujar bounding (si viene polygon)
+        if (d.boundingBox) {
+          const bb = d.boundingBox;
+          overlayCtx.strokeStyle = 'lime';
+          overlayCtx.lineWidth = 3;
+          overlayCtx.strokeRect(bb.x, bb.y, bb.width, bb.height);
+        } else if (d.cornerPoints) {
+          drawBoundingBox(d.cornerPoints);
+        }
+        resultEl.textContent = d.rawValue || d.rawData || 'Leído';
+        formatEl.textContent = 'Formato: ' + d.format;
+        // Detener si quieres lectura única:
+        // stopCamera();
+      } else {
+        resultEl.textContent = '— Esperando escaneo —';
+        formatEl.textContent = '';
+      }
+    } catch (err) {
+      console.error('BarcodeDetector error', err);
+    }
+    rafId = requestAnimationFrame(scanWithBarcodeDetector);
+  }
+
+  // Lectura via jsQR (fallback)
+  function scanWithJsQR() {
+    try {
+      if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+        rafId = requestAnimationFrame(scanWithJsQR);
+        return;
+      }
+      resizeCanvas();
+      overlayCtx.drawImage(video, 0, 0, overlay.width, overlay.height);
+      const imageData = overlayCtx.getImageData(0, 0, overlay.width, overlay.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
+
+      overlayCtx.clearRect(0,0,overlay.width,overlay.height);
+      if (code) {
+        // dibuja caja
+        drawBoundingBox(code.location && [
+          code.location.topLeftCorner,
+          code.location.topRightCorner,
+          code.location.bottomRightCorner,
+          code.location.bottomLeftCorner
+        ]);
+        resultEl.textContent = code.data;
+        formatEl.textContent = 'Formato: QR (jsQR)';
+        // Si quieres detener tras primer scan:
+        // stopCamera();
+      } else {
+        resultEl.textContent = '— Esperando escaneo —';
+        formatEl.textContent = '';
+      }
+    } catch (err) {
+      console.error('jsQR error', err);
+    }
+    rafId = requestAnimationFrame(scanWithJsQR);
+  }
+
+  // Iniciar cámara
+  async function startCamera() {
+    noCamEl.style.display = 'none';
+    try {
+      // Prefer rear camera if posible
+      const constraints = {
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: false
+      };
+      stream = await navigator.mediaDevices.getUserMedia(constraints);
+      video.srcObject = stream;
+      track = stream.getVideoTracks()[0];
+
+      // mostrar botón flash si el dispositivo lo soporta
+      const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+      if (capabilities.torch) {
+        flashBtn.style.display = 'inline-block';
+      } else {
+        flashBtn.style.display = 'none';
+      }
+
+      await video.play();
+      resizeCanvas();
+
+      // elegir detector
+      if ('BarcodeDetector' in window) {
+        try {
+          const supportedFormats = await BarcodeDetector.getSupportedFormats();
+          // verificamos que QR esté soportado
+          if (supportedFormats.includes('qr_code')) {
+            barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] });
+          } else {
+            barcodeDetector = null;
+          }
+        } catch (e) {
+          barcodeDetector = null;
+        }
+      }
+
+      scanning = true;
+      stopBtn.disabled = false;
+      startBtn.disabled = true;
+
+      if (barcodeDetector) {
+        scanWithBarcodeDetector();
+      } else {
+        // cubrir con fondo negro antes de jsQR
+        overlayCtx.clearRect(0,0,overlay.width,overlay.height);
+        scanWithJsQR();
+      }
+    } catch (err) {
+      console.error('No se puede acceder a la cámara', err);
+      noCamEl.style.display = 'flex';
+    }
+  }
+
+  // Detener cámara
+  function stopCamera() {
+    scanning = false;
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    if (rafId) cancelAnimationFrame(rafId);
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+    }
+    overlayCtx.clearRect(0,0,overlay.width,overlay.height);
+  }
+
+  // Toggle flash (torch) si disponible
+  async function toggleFlash() {
+    if (!track) return;
+    try {
+      useTorch = !useTorch;
+      await track.applyConstraints({ advanced: [{ torch: useTorch }] });
+      flashBtn.textContent = useTorch ? 'Apagar flash' : 'Encender flash';
+    } catch (err) {
+      console.warn('Flash no soportado o error', err);
+    }
+  }
+
+  // Eventos botones
+  startBtn.addEventListener('click', startCamera);
+  stopBtn.addEventListener('click', stopCamera);
+  flashBtn.addEventListener('click', toggleFlash);
+
+  // Si quieres autoiniciar al entrar:
+  // startCamera();
+
+  // Manejo de cerrar pestaña / navegación
+  window.addEventListener('pagehide', stopCamera);
+  window.addEventListener('beforeunload', stopCamera);
+</script>
+
+</body>
+</html>

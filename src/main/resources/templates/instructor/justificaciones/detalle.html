@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalle Justificación - Instructor</title>
+  <link rel="stylesheet" th:href="@{/css/instructor.css}">
+
+  <!-- Tailwind y Alpine -->
+  <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js" defer></script>
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+</head>
+<body x-data="{ openMenu: false }">
+
+<header class="header">
+  <div class="flex justify-between items-center px-4 py-2">
+    <button @click="openMenu = !openMenu" class="focus:outline-none">
+      <i class="bi bi-list text-2xl text-green-800"></i>
+    </button>
+    <div class="flex items-center relative" x-data="{ open: false }">
+      <button @click="open = !open" class="flex items-center focus:outline-none">
+        <img th:src="@{/img/instructor.gif}" class="h-10 w-10 rounded-full" alt="Perfil">
+        <i class="bi bi-caret-down-fill ml-2"></i>
+      </button>
+      <div x-show="open" @click.away="open = false" class="menu-user">
+        <ul>
+          <li><a th:href="@{/perfil}">Mi Perfil</a></li>
+          <li><a th:href="@{/logout}">Cerrar Sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="flex">
+  <!-- Sidebar -->
+  <aside :class="openMenu ? 'sidebar sidebar-open' : 'sidebar sidebar-closed'">
+    <br>
+    <img th:src="@{/img/logocheckin.png}" alt="Logo" class="logo">
+    <nav>
+      <a th:href="@{/instructor/asistencia}" class="nav-link"><i class="bi bi-check2-square"></i> Asistencias</a>
+      <a th:href="@{/instructor/carnet_digital}" class="nav-link"><i class="bi bi-card-image"></i> Carnet Digital</a>
+      <a th:href="@{/instructor/registroEquipos}" class="nav-link"><i class="bi bi-hdd-stack"></i> Registro Equipos</a>
+      <a th:href="@{/instructor/justificaciones}" class="nav-link"><i class="bi bi-chat-dots"></i> Justificaciones</a>
+      <a th:href="@{/instructor/reportes}" class="nav-link"><i class="bi bi-bar-chart-line"></i> Reportes</a>
+      <a th:href="@{/instructor/programming}" class="nav-link"><i class="bi bi-grid"></i> Programación</a>
+    </nav>
+    <div class="scroll-indicator">
+      <i class="bi bi-arrow-down-short"></i>
+    </div>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="flex-1 p-6 transition-all duration-300" :class="openMenu ? 'ml-0 md:ml-64' : 'ml-0'">
+
+    <div class="dashboard-container1">
+      <div class="dashboard-header">
+        <h2 class="dashboard-title">Revisión de Justificación</h2>
+      </div>
+
+      <div class="card1">
+        <p><strong>Aprendiz:</strong> <span th:text="${justificacion.user.nombre}"></span></p>
+        <p><strong>Motivo:</strong> <span th:text="${justificacion.motivo}"></span></p>
+        <p><strong>Fecha:</strong> <span th:text="${justificacion.fecha}"></span></p>
+        <p><strong>Archivo:</strong>
+          <a th:if="${justificacion.archivo != null}"
+             th:href="@{'/uploads/' + ${justificacion.archivo}}" target="_blank"
+             class="link">
+            Ver archivo
+          </a>
+          <span th:if="${justificacion.archivo == null}">-</span>
+        </p>
+
+        <form th:action="@{'/instructor/justificaciones/' + ${justificacion.id} + '/actualizar'}"
+              method="post" class="form">
+
+          <div>
+            <label class="label">Estado:</label>
+            <select name="estado" class="input">
+              <option th:each="e : ${T(com.Check_In.Check__In1.entity.EstadoJustificacion).values()}"
+                      th:value="${e}"
+                      th:text="${e}"
+                      th:selected="${e == justificacion.estado}">
+              </option>
+            </select>
+          </div>
+
+          <div>
+            <label class="label">Comentario:</label>
+            <textarea name="comentario" rows="3" cols="40"
+                      th:text="${justificacion.comentario}"
+                      class="input"></textarea>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-green">Guardar</button>
+            <a th:href="@{/instructor/justificaciones}" class="btn btn-gray">Volver</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+
+</body>
+</html>

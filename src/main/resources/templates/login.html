@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Iniciar Sesion</title>
+
+
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet" />
+
+
+    <link th:href="@{/css/login.css}" rel="stylesheet" />
+
+
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js" defer></script>
+
+
+</head>
+
+<body>
+<section class="bg-transparent w-full flex items-center justify-center">
+    <div class="flex flex-col items-center justify-center px-8 mx-auto w-full max-w-xl">
+        <div class="flex items-center mb-8 text-4xl text-green-900 title-login">
+            Iniciar Sesión
+        </div>
+        <div class="w-full rounded-lg shadow-lg sm:max-w-sm xl:p-0 border border-green-200 p-8 mt-8 mb-8 container-login">
+            <div class="p-6 space-y-6">
+                <h1 class="text-xl font-bold leading-tight tracking-tight text-green-900 md:text-2xl subtitle-login">
+                    Accede a tu cuenta
+                </h1>
+
+                <form method="post" action="/login" th:object="${usuario}">
+                    <div th:if="${error}" class="alert-error" role="alert">
+                        <strong class="font-bold">Error!</strong>
+                        <span th:text="${error}"></span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="email" class="block text-sm font-medium text-green-900">Correo Electrónico</label>
+                        <input
+                                type="email"
+                                name="email"
+                                id="email"
+                                th:value="${usuario?.email}"
+                                class="input-login"
+                                placeholder="nombre@empresa.com"
+                                required
+                        />
+                    </div>
+                    <br>
+                    <div class="space-y-2">
+                        <label for="password" class="block text-sm font-medium text-green-900">Contraseña</label>
+                        <input
+                                type="password"
+                                name="password"
+                                id="password"
+                                class="input-login"
+                                required
+                        />
+                    </div>
+                    <br>
+                    <button type="submit" class="btn-login">
+                        Iniciar sesión
+                    </button>
+                    <br> <br>
+                    <p class="text-sm font-light text-green-800 text-center">
+                        ¿No tienes una cuenta?
+                        <a th:href="@{/register}" class="font-medium text-green-700 hover:underline">Regístrate aquí</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+
+</html>
