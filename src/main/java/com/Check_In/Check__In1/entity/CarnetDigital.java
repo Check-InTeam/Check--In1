@@ -25,7 +25,7 @@ public class CarnetDigital {
     @Column(nullable = true, length = 500)
     private String jornada;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String foto;
 
     @ManyToOne

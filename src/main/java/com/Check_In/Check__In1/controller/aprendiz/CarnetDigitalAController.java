@@ -42,7 +42,8 @@ import java.util.Optional;
 
 @Controller
 @RequestMapping("/aprendiz/carnet_digital")
-public class CarnetDigitalAController {
+public class
+CarnetDigitalAController {
 
     @Autowired
     private CarnetDigitalService carnetDigitalService;
@@ -57,8 +58,9 @@ public class CarnetDigitalAController {
         if (user == null) {
             return "redirect:/login";
         }
-        Optional<CarnetDigital> carnetOpt = carnetDigitalService.getCarnetByUser(user);
-        carnetOpt.ifPresent(c -> model.addAttribute("carnet", c));
+
+        model.addAttribute("carnet", carnetDigitalService.getCarnetByUser(user).orElse(null));
+
         return "aprendiz/carnet_digital/index";
     }
 
@@ -66,13 +68,13 @@ public class CarnetDigitalAController {
     @GetMapping("/create")
     public String createForm(Model model, HttpSession session) {
         User user = (User) session.getAttribute("usuarioLogueado");
-        if (user == null) {
-            return "redirect:/login";
-        }
-        Optional<CarnetDigital> carnetExist = carnetDigitalService.getCarnetByUser(user);
-        if (carnetExist.isPresent()) {
+        if (user == null) return "redirect:/login";
+
+        // Si ya tiene carnet, lo lleva al index
+        if (carnetDigitalService.getCarnetByUser(user).isPresent()) {
             return "redirect:/aprendiz/carnet_digital";
         }
+
         model.addAttribute("carnet", new CarnetDigital());
         return "aprendiz/carnet_digital/create";
     }
@@ -80,28 +82,34 @@ public class CarnetDigitalAController {
     // Guardar carnet nuevo
     @PostMapping("/guardar")
     public String saveCarnet(@ModelAttribute CarnetDigital carnet,
-                             @RequestParam("file") MultipartFile file,
+                             @RequestParam(value = "archivo", required = false) MultipartFile file,
                              HttpSession session) throws IOException {
+
         User user = (User) session.getAttribute("usuarioLogueado");
         if (user == null) {
             return "redirect:/login";
         }
 
-        // Guardar foto en carpeta
-        if (!file.isEmpty()) {
+        // Solo guardar foto si viene del admin
+        if (file != null && !file.isEmpty()) {
+
             String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+
             File uploadDir = new File("uploads/carnet/");
             if (!uploadDir.exists()) uploadDir.mkdirs();
+
             try (FileOutputStream fos = new FileOutputStream("uploads/carnet/" + filename)) {
                 fos.write(file.getBytes());
             }
-            carnet.setFoto(filename); // ahora foto es String
+
+            carnet.setFoto(filename);
         }
 
         carnet.setUser(user);
         carnetDigitalService.saveCarnet(carnet);
         return "redirect:/aprendiz/carnet_digital";
     }
+
 
     // Mostrar foto
     @GetMapping("/foto/{id}")
