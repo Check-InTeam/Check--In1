@@ -82,16 +82,17 @@ CarnetDigitalAController {
     // Guardar carnet nuevo
     @PostMapping("/guardar")
     public String saveCarnet(@ModelAttribute CarnetDigital carnet,
-                             @RequestParam(value = "archivo", required = false) MultipartFile file,
+                             @RequestParam(value = "file", required = false) MultipartFile file,
                              HttpSession session) throws IOException {
 
         User user = (User) session.getAttribute("usuarioLogueado");
-        if (user == null) {
-            return "redirect:/login";
-        }
+        if (user == null) return "redirect:/login";
 
-        // Solo guardar foto si viene del admin
-        if (file != null && !file.isEmpty()) {
+        // Verificar rol
+        String rol = user.getRole().getNombre();// Ajusta si tu campo rol se llama diferente
+
+        // ✔ SOLO EL ADMIN puede subir foto
+        if (file != null && !file.isEmpty() && rol.equalsIgnoreCase("ADMIN")) {
 
             String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
@@ -105,10 +106,13 @@ CarnetDigitalAController {
             carnet.setFoto(filename);
         }
 
+        // Si no es admin, se ignora completamente cualquier foto enviada
         carnet.setUser(user);
         carnetDigitalService.saveCarnet(carnet);
+
         return "redirect:/aprendiz/carnet_digital";
     }
+
 
 
     // Mostrar foto
