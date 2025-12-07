@@ -35,20 +35,9 @@ public class ProgramacionInstructorController {
         }
 
         model.addAttribute("programming", resultados);
-        return "/instructor/programming/index";
+        return "instructor/programming/index";
     }
 
-    @GetMapping("/show/{id}")
-    public String showInstructor(@PathVariable int id, Model model) {
-        Programacion programacion = programacionService.getProgramacionById(id)
-                .orElse(null);
 
-        if (programacion != null) {
-            model.addAttribute("programming", programacion);
-            return "/instructor/programming/show";
-        } else {
-            return "redirect:/instructor/programming";
-        }
-    }
 }
 

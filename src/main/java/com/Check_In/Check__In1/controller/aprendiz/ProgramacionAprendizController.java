@@ -35,7 +35,7 @@ public class ProgramacionAprendizController {
         }
 
         model.addAttribute("programming", resultados);
-        return "/aprendiz/programming/index";
+        return "aprendiz/programming/index";
     }
 
     @GetMapping("/show/{id}")
@@ -45,7 +45,7 @@ public class ProgramacionAprendizController {
 
         if (programacion != null) {
             model.addAttribute("programming", programacion);
-            return "/aprendiz/programming/show";
+            return "aprendiz/programming/show";
         } else {
             return "redirect:/aprendiz/programming";
         }
