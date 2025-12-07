@@ -62,7 +62,7 @@ public class ProgramacionAdministradorController {
     public String createProgrammingForm(Model model) {
         model.addAttribute("programming", new Programacion());
         model.addAttribute("users", userRepository.findByRoleNombre("INSTRUCTOR"));
-        return "/administrador/programming/create";
+        return "administrador/programming/create";
     }
 
     @PostMapping
@@ -146,7 +146,7 @@ public class ProgramacionAdministradorController {
         Optional<Programacion> programmingOpt = programacionService.getProgramacionById(id);
         if (programmingOpt.isPresent()) {
             model.addAttribute("programming", programmingOpt.get());
-            return "/administrador/programming/show";
+            return "administrador/programming/show";
         } else {
             return "redirect:/administrador/programming";
         }
