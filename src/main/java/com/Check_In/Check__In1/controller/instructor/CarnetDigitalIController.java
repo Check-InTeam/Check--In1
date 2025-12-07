@@ -54,10 +54,11 @@ public class CarnetDigitalIController {
     @GetMapping
     public String index(Model model, HttpSession session) {
         User user = (User) session.getAttribute("usuarioLogueado");
-        if (user == null) return "redirect:/login";
+        if (user == null) {
+            return "redirect:/login";
+        }
 
-        Optional<CarnetDigital> carnetOpt = carnetDigitalService.getCarnetByUser(user);
-        carnetOpt.ifPresent(c -> model.addAttribute("carnet", c));
+        model.addAttribute("carnet", carnetDigitalService.getCarnetByUser(user).orElse(null));
 
         return "instructor/carnet_digital/index";
     }
@@ -79,16 +80,21 @@ public class CarnetDigitalIController {
     // Guardar carnet nuevo con foto
     @PostMapping("/guardar")
     public String saveCarnet(@ModelAttribute CarnetDigital carnet,
-                             @RequestParam("file") MultipartFile file,
+                             @RequestParam(value = "file", required = false) MultipartFile file,
                              HttpSession session) throws IOException {
         User user = (User) session.getAttribute("usuarioLogueado");
         if (user == null) return "redirect:/login";
 
+        String rol = user.getRole().getNombre();
+
         // Guardar foto en carpeta
-        if (!file.isEmpty()) {
+        if (file != null && !file.isEmpty() && rol.equalsIgnoreCase("ADMINISTRADOR")) {
+
             String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+
             File uploadDir = new File("uploads/carnet/");
             if (!uploadDir.exists()) uploadDir.mkdirs();
+
             try (FileOutputStream fos = new FileOutputStream("uploads/carnet/" + filename)) {
                 fos.write(file.getBytes());
             }
