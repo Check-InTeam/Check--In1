@@ -54,7 +54,7 @@ public class ProgramacionAdministradorController {
             model.addAttribute("messageError", messageError);
         }
 
-        return "/administrador/programming/index";
+        return "administrador/programming/index";
     }
 
 
