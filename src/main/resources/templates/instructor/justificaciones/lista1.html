@@ -79,26 +79,45 @@
                 </thead>
                 <tbody>
                 <tr th:each="j : ${justificaciones}" class="table-row">
-                    <td th:text="${j.user.nombre}"></td>
-                    <td th:text="${j.motivo}"></td>
-                    <td th:text="${j.fecha}"></td>
-                    <td th:text="${j.estado}" class="font-semibold"></td>
-                    <td th:text="${j.comentario ?: '-'}"></td>
-                    <td class="text-center">
-                    <span th:if="${j.archivo != null}">
-                        <a th:href="@{'/uploads/' + ${j.archivo}}" target="_blank">Ver archivo</a>
-                    </span>
-                        <span th:if="${j.archivo == null}">-</span>
-                    </td>
-                    <td class="text-center space-x-2">
-                        <a th:href="@{'/instructor/justificaciones/' + ${j.id}}"
-                           class="btn-edit" title="Revisar">
-                            <i class="bi bi-eye"></i>
-                        </a>
-                    </td>
-                </tr>
+                    <form th:action="@{'/instructor/justificaciones/' + ${j.id} + '/actualizar'}" method="post">
+                        <!-- Aprendiz -->
+                        <td th:text="${j.user.nombre}"></td>
 
+                        <!-- Motivo -->
+                        <td th:text="${j.motivo}"></td>
+
+                        <!-- Fecha -->
+                        <td th:text="${j.fecha}"></td>
+
+                        <!-- Estado -->
+                        <td>
+                            <select name="estado" class="input">
+                                <option th:each="e : ${estados}" th:value="${e}" th:text="${e}" th:selected="${e == j.estado}"></option>
+                            </select>
+                        </td>
+
+                        <!-- Comentario -->
+                        <td>
+                            <input type="text" name="comentario" th:value="${j.comentario}" placeholder="Comentario" class="input">
+                        </td>
+
+                        <!-- Archivo -->
+                        <td class="text-center">
+            <span th:if="${j.archivo != null}">
+                <a th:href="@{'/uploads/' + ${j.archivo}}" target="_blank">Ver archivo</a>
+            </span>
+                            <span th:if="${j.archivo == null}">-</span>
+                        </td>
+
+                        <!-- Acciones -->
+                        <td class="text-center">
+                            <button type="submit" class="btn btn-green">Guardar</button>
+                        </td>
+                    </form>
+                </tr>
                 </tbody>
+
+
             </table>
 
         </div>

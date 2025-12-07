@@ -78,7 +78,6 @@
                     <th>Hora Entrada</th>
                     <th>Estado</th>
                     <th>Observaciones</th>
-                    <th>Acciones</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -92,17 +91,7 @@
                                         (${asistenciaMap[user.id] != null and asistenciaMap[user.id].estado == 'Ausente'} ? ' estado-ausente' : ' estado-tarde')">
                     </td>
                     <td th:text="${asistenciaMap[user.id] != null ? asistenciaMap[user.id].observaciones : '-'}"></td>
-                    <td class="text-center space-x-2">
-                        <a th:href="@{'/administrador/asistencia/ver/' + ${asistenciaMap[user.id] != null ? asistenciaMap[user.id].id : 0}}"
-                           class="btn-view" title="Ver">
-                            <i class="bi bi-eye-fill"></i>
-                        </a>
-                        <a th:href="@{'/administrador/asistencia/eliminar/' + ${asistenciaMap[user.id] != null ? asistenciaMap[user.id].id : 0}}"
-                           onclick="return confirm('¿Seguro deseas eliminar esta asistencia?');"
-                           class="btn-delete" title="Eliminar">
-                            <i class="bi bi-trash-fill"></i>
-                        </a>
-                    </td>
+
                 </tr>
                 </tbody>
             </table>

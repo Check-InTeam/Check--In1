@@ -87,11 +87,12 @@
           <td th:text="${reporte.advertencia ? 'Sí' : 'No'}"></td>
           <td class="text-center space-x-2">
 
-            <form th:action="@{'/administrador/reportes/delete/{id}' + ${reporte.id}}" method="post" style="display:inline;">
+            <form th:action="@{/administrador/reportes/delete/{id}(id=${reporte.id})}" method="post" style="display:inline;">
               <button type="submit" onclick="return confirm('¿Seguro deseas eliminar este reporte?');" class="btn-delete">
                 <i class="bi bi-trash"></i>
               </button>
             </form>
+
 
           </td>
         </tr>

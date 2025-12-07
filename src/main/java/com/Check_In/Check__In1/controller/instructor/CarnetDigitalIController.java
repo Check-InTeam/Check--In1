@@ -103,6 +103,7 @@ public class CarnetDigitalIController {
 
         carnet.setUser(user);
         carnetDigitalService.saveCarnet(carnet);
+
         return "redirect:/instructor/carnet_digital";
     }
 

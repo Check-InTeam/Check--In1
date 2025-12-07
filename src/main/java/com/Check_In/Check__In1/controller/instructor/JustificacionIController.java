@@ -23,15 +23,8 @@ public class JustificacionIController {
         return "instructor/justificaciones/lista1";
     }
 
-    // 👉 Ver detalle de una justificación
-    @GetMapping("/{id}")
-    public String verDetalle(@PathVariable int id, Model model) {
-        Justificacion justificacion = justificacionService.findById(id);
-        model.addAttribute("justificacion", justificacion);
-        return "instructor/justificaciones/detalle";
-    }
 
-    // 👉 Actualizar estado + comentario
+    // Actualizar estado + comentario directamente desde la tabla
     @PostMapping("/{id}/actualizar")
     public String actualizarEstadoComentario(
             @PathVariable int id,
@@ -48,4 +41,6 @@ public class JustificacionIController {
         return "redirect:/instructor/justificaciones";
     }
 }
+
+
 

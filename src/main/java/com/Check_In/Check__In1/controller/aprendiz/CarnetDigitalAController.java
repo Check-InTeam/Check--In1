@@ -92,7 +92,7 @@ CarnetDigitalAController {
         String rol = user.getRole().getNombre();// Ajusta si tu campo rol se llama diferente
 
         // ✔ SOLO EL ADMIN puede subir foto
-        if (file != null && !file.isEmpty() && rol.equalsIgnoreCase("ADMIN")) {
+        if (file != null && !file.isEmpty() && rol.equalsIgnoreCase("ADMINISTRADOR")) {
 
             String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
